@@ -5,136 +5,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BigBull Digital | Student Portal</title>
     <style>
-        :root { --primary: #004d40; --secondary: #FFD700; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 8px solid var(--primary); }
-        h2 { color: var(--primary); margin-bottom: 5px; }
-        p { color: #666; margin-bottom: 25px; }
+        :root { --primary: #004d40; --accent: #FFD700; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
         
-        .task-switcher { display: flex; align-items: center; justify-content: center; gap: 15px; background: #f9f9f9; padding: 15px; border-radius: 10px; margin-bottom: 25px; }
-        .arrow-btn { background: var(--primary); color: var(--secondary); border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px; font-weight: bold; }
-        select { padding: 10px; border-radius: 5px; border: 1px solid #ddd; font-size: 16px; flex-grow: 1; outline: none; }
+        /* Main Container */
+        main { background: white; width: 90%; max-width: 500px; padding: 2rem; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 10px solid var(--primary); }
+        
+        header { text-align: center; margin-bottom: 2rem; }
+        header h1 { color: var(--primary); margin: 0; font-size: 1.8rem; }
+        header p { color: #666; font-size: 0.9rem; }
 
-        input { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .submit-btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        .submit-btn:hover { background: #00332a; }
+        /* Task Navigation */
+        .task-control { display: flex; align-items: center; gap: 10px; background: #eee; padding: 10px; border-radius: 10px; margin-bottom: 1.5rem; }
+        .nav-btn { background: var(--primary); color: var(--accent); border: none; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-weight: bold; }
+        select { flex-grow: 1; padding: 8px; border: none; border-radius: 5px; background: transparent; font-size: 1rem; outline: none; }
 
-        .data-section { margin-top: 30px; text-align: left; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
-        th { background: #f4f4f4; color: var(--primary); }
-        .marks-badge { background: var(--secondary); color: #000; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+        /* Form Elements */
+        section form { display: flex; flex-direction: column; gap: 12px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; outline-color: var(--primary); }
+        button#submitBtn { padding: 15px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button#submitBtn:hover { background: #00332a; opacity: 0.9; }
+
+        /* Submissions Table */
+        footer { margin-top: 2rem; border-top: 1px solid #eee; padding-top: 1rem; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th { text-align: left; color: var(--primary); padding-bottom: 10px; }
+        td { padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
+        .badge { background: var(--accent); padding: 2px 6px; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>BigBull Digital</h2>
-    <p>Graphic Designing Student Portal</p>
+<main>
+    <header>
+        <h1>BigBull Digital</h1>
+        <p>Graphic Designing Student Portal</p>
+    </header>
 
-    <div class="task-switcher">
-        <button class="arrow-btn" onclick="moveTask(-1)">&#8592;</button>
-        <select id="taskDropdown" onchange="updateTaskView()">
-            </select>
-        <button class="arrow-btn" onclick="moveTask(1)">&#8594;</button>
-    </div>
+    <section>
+        <div class="task-control">
+            <button class="nav-btn" onclick="changeTask(-1)">&#8592;</button>
+            <select id="taskPicker" onchange="refreshData()"></select>
+            <button class="nav-btn" onclick="changeTask(1)">&#8594;</button>
+        </div>
 
-    <input type="text" id="stuName" placeholder="Enter Your Full Name">
-    <input type="text" id="designLink" placeholder="Paste Your Design Link (Drive/Behance)">
-    <button class="submit-btn" onclick="sendToSheet()">Submit My Task</button>
+        <form id="submissionForm" onsubmit="event.preventDefault(); sendData();">
+            <input type="text" id="nameInput" placeholder="Apna Pura Naam Likhen" required>
+            <input type="url" id="linkInput" placeholder="Design Link (Canva/Drive)" required>
+            <button type="submit" id="submitBtn">Submit My Task</button>
+        </form>
+    </section>
 
-    <div class="data-section">
-        <h4 id="listTitle">Submissions for Task 1</h4>
+    <footer>
+        <h3 id="tableTitle" style="font-size: 1rem; color: #444;">Submissions</h3>
         <table>
             <thead>
                 <tr>
-                    <th>Student Name</th>
-                    <th>Design</th>
+                    <th>Student</th>
+                    <th>Link</th>
                     <th>Marks</th>
                 </tr>
             </thead>
-            <tbody id="studentTableBody">
+            <tbody id="dataTableBody">
                 </tbody>
         </table>
-    </div>
-</div>
+    </footer>
+</main>
 
 <script>
-    const scriptURL = 'const scriptURL = 'https://script.google.com/macros/s/AKfycbzPeX4amNXrkwowIhn2btnAZ83FtYM2pW7nwgvDKwF3keNjLxgpOolVNz1SrI3O00C6Aw/exec';'; 
-    const dropdown = document.getElementById('taskDropdown');
+    // 1. https://script.google.com/macros/s/AKfycbwQ49sfM7bTU6DfowGhkXCmL5daJn3wzLCuR8Fm6ylsOyXV9aBf7MEs6X3LMWl9Lyh-mA/exec
+    const scriptURL = 'YAHAN_APNA_URL_PASTE_KAREIN'; 
+    const picker = document.getElementById('taskPicker');
 
-    // 1. Create 20 Tasks in List
+    // 2. Task List 1 to 20 generate karna
     for (let i = 1; i <= 20; i++) {
         let opt = document.createElement('option');
         opt.value = "Task " + i;
         opt.innerHTML = "Task " + i;
-        dropdown.appendChild(opt);
+        picker.appendChild(opt);
     }
 
-    // 2. Change Task with Arrows
-    function moveTask(direction) {
-        let newIndex = dropdown.selectedIndex + direction;
-        if (newIndex >= 0 && newIndex < 20) {
-            dropdown.selectedIndex = newIndex;
-            updateTaskView();
+    // 3. Arrow buttons function
+    function changeTask(step) {
+        let newIdx = picker.selectedIndex + step;
+        if (newIdx >= 0 && newIdx < 20) {
+            picker.selectedIndex = newIdx;
+            refreshData();
         }
     }
 
-    // 3. Update View when Task Changes
-    function updateTaskView() {
-        document.getElementById('listTitle').innerText = "Submissions for " + dropdown.value;
-        fetchData();
-    }
+    // 4. Data submit karna
+    function sendData() {
+        const btn = document.getElementById('submitBtn');
+        btn.innerText = "Sending...";
+        btn.disabled = true;
 
-    // 4. Send Data to Google Sheet
-    function sendToSheet() {
-        const name = document.getElementById('stuName').value;
-        const link = document.getElementById('designLink').value;
-        const task = dropdown.value;
-
-        if(!name || !link) return alert("Please fill all fields!");
+        const payload = {
+            name: document.getElementById('nameInput').value,
+            link: document.getElementById('linkInput').value,
+            task: picker.value
+        };
 
         fetch(scriptURL, {
             method: 'POST',
-            body: JSON.stringify({ name: name, link: link, task: task })
+            body: JSON.stringify(payload)
         })
         .then(() => {
-            alert("Submission successful!");
-            document.getElementById('stuName').value = "";
-            document.getElementById('designLink').value = "";
-            fetchData();
-        });
+            alert("Task Submit Ho Gaya!");
+            btn.innerText = "Submit My Task";
+            btn.disabled = false;
+            document.getElementById('submissionForm').reset();
+            refreshData();
+        })
+        .catch(err => alert("Error: " + err));
     }
 
-    // 5. Fetch and Filter Data
-    function fetchData() {
-        const currentTask = dropdown.value;
-        const tbody = document.getElementById('studentTableBody');
-        tbody.innerHTML = "<tr><td colspan='3'>Loading data...</td></tr>";
+    // 5. Data load aur filter karna
+    function refreshData() {
+        const currentTask = picker.value;
+        document.getElementById('tableTitle').innerText = "Submissions: " + currentTask;
+        const tbody = document.getElementById('dataTableBody');
+        tbody.innerHTML = "<tr><td colspan='3'>Loading...</td></tr>";
 
         fetch(scriptURL)
         .then(res => res.json())
         .then(data => {
             tbody.innerHTML = "";
-            // Skip first row (headers) and filter by task
+            // Row 0 header hoti hai, isliye slice(1)
             data.slice(1).forEach(row => {
                 if(row[1] === currentTask) {
                     let tr = `<tr>
                         <td>${row[0]}</td>
-                        <td><a href="${row[2]}" target="_blank" style="color:blue">View Design</a></td>
-                        <td><span class="marks-badge">${row[3] || 'Pending'}</span></td>
+                        <td><a href="${row[2]}" target="_blank">View</a></td>
+                        <td><span class="badge">${row[3] || 'Pending'}</span></td>
                     </tr>`;
                     tbody.innerHTML += tr;
                 }
             });
             if(tbody.innerHTML === "") {
-                tbody.innerHTML = "<tr><td colspan='3'>No submissions yet for this task.</td></tr>";
+                tbody.innerHTML = "<tr><td colspan='3'>No one submitted yet.</td></tr>";
             }
         });
     }
 
-    // Initial Load
-    fetchData();
+    // Pehli baar load karne par
+    window.onload = refreshData;
 </script>
 
 </body>
